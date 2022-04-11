@@ -18,9 +18,10 @@ if __name__ == '__main__':
             np.hstack([xybound[3]*np.sin(p_theta), xybound[3]*np.sin(p_theta+np.pi)])
             ])
         flag = 0
-        x_goal = p_circ[:, :N]
+        x_goal = p_circ[:, :N] 
         while not rospy.is_shutdown():
             pose = getposition(N)
+            print (np.column_stack((pose[0:2])))
             pose_si = uni_to_si_states(pose)
             if(np.linalg.norm(x_goal - pose_si) < 0.05):
                 flag = 1-flag
@@ -38,5 +39,5 @@ if __name__ == '__main__':
             put_velocities(N, k)
 
     except rospy.ROSInterruptException:
-        
+        rospy.signal_shutdown('End of testing')
         pass

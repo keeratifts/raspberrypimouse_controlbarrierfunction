@@ -50,6 +50,7 @@ def match_pair(poly_shapes, new_coords, centroids):
             if p.within(poly):
                 pair = new_centroids[j]
                 sorted_centroids.append(pair)
+    sorted_cen = np.column_stack((sorted_centroids))
     return sorted_centroids
 
 def _plotting(fig, ax, iter, save_fig=False):
@@ -128,7 +129,6 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             _plotting(fig, ax, 50)
             (pose, yaw) = getposition(N)
-            print (yaw)
             (area, shape, poly2pt, centroids) = gen_voronoi(pose)
             plot_voronoi_polys_with_points_in_area(ax, area, shape, pose, poly2pt,voronoi_edgecolor='black', points_color='black', 
                                         points_markersize=30, voronoi_and_points_cmap=None)

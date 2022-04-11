@@ -4,7 +4,7 @@ from cvxopt import matrix, sparse
 from cvxopt.solvers import qp, options
 from math import *
 
-def si_position_controller(xi, positions, x_velocity_gain=0.45, y_velocity_gain=0.45, velocity_magnitude_limit=0.15):
+def si_position_controller(xi, positions, x_velocity_gain=1, y_velocity_gain=1, velocity_magnitude_limit=0.3):
     _,N = np.shape(xi)
     dxi = np.zeros((2, N))
 
@@ -66,7 +66,7 @@ def robotFeedbackControl(xi, positions, GOAL_DIST_THRESHOLD=0.05, K_RO=3, K_ALPH
     dxi[:, idxs] = 0
     return dxi
 
-def robotPDFeedbackControl(xi, positions, n, a, GOAL_DIST_THRESHOLD=0.05, K_RO=3, K_ALPHA=9, Kd_RO = 5, Kd_ALPHA = 5, V_CONST=0.2):
+def robotPDFeedbackControl(xi, positions, n, a, GOAL_DIST_THRESHOLD=0.05, K_RO=3, K_ALPHA=13, Kd_RO = 5, Kd_ALPHA = 5, V_CONST=0.3):
     _,N = np.shape(xi)
     dxi = np.zeros((2, N))
 

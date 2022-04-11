@@ -1,22 +1,15 @@
 #! /usr/bin/env python
 
-from numpy import linalg as la
+from importlib.resources import path
 import numpy as np
+from math import *
+import matplotlib.pyplot as plt
 
-arr1 = np.arange(1, 10).reshape(1, 9)
-arr2 = np.arange(10, 19).reshape(1, 9)
+import sys
 
-arr = np.vstack((arr1, arr2))
+i = [1, 2, 3, 4]
 
-print (arr)
-
-a = np.zeros((3,20))
-a[0, :] = 1
-print (a)
-
-a = np.array([[4],[5]]) 
-print(a)
-
-
-a[[0, 1]] = a[[1, 0]]
-print(a)
+empty_array = np.empty((0, 4), int)
+empty_array = np.append(empty_array, np.array([[16, 26, 36], [17, 27, 37]]), axis=0)
+print('2D Numpy array:')
+print(empty_array)

@@ -5,55 +5,49 @@ from raspi import *
 from transform import *
 from controller import *
 
-N = 20
-
-def uni_to_si_dyn(dxu, poses, projection_distance=0.05):
-    M,N = np.shape(dxu)
-
-    cs = np.cos(poses[2, :])
-    ss = np.sin(poses[2, :])
-
-    dxi = np.zeros((2, N))
-    dxi[0, :] = (cs*dxu[0, :] - projection_distance*ss*dxu[1, :])
-    dxi[1, :] = (ss*dxu[0, :] + projection_distance*cs*dxu[1, :])
-
-    return dxi
-
+N = 8
+LOG_DIR = '/home/robolab/raspi_ws/src/coverage_control/Data'
+iterations = 1
 
 if __name__ == '__main__':
     try:
         rospy.init_node('control_node', anonymous = False)
-        radius = 1.5
-        xybound = radius*np.array([-1, 1, -1, 1])
-        p_theta = 2*np.pi*(np.arange(0, 2*N, 2)/(2*N))
-        p_circ = np.vstack([
-            np.hstack([xybound[1]*np.cos(p_theta), xybound[1]*np.cos(p_theta+np.pi)]),
-            np.hstack([xybound[3]*np.sin(p_theta), xybound[3]*np.sin(p_theta+np.pi)])
-            ])
-        flag = 0
-        x_goal = p_circ[:, :N]
+        x_goal = np.array([[-2, -2, 2, 2, 0.25, -0.25, 0.25, -0.25], [0.25, -0.25, 0.25, -0.25, -2, -2, 2, 2]])
+        x_traj = np.empty((0, N), float)
+        y_traj = np.empty((0, N), float)
+        count = 0
         norms = np.zeros((1,N))
         alpha = np.zeros((1,N))
         while not rospy.is_shutdown():
             pose = getposition(N)
-            (dxu, norms, alpha) =robotPDFeedbackControl(pose, x_goal, norms, alpha)
             pose_si = uni_to_si_states(pose)
-            dxi = uni_to_si_dyn(dxu, pose)
-            print (np.linalg.norm(x_goal - pose_si))
-            if(np.linalg.norm(x_goal - pose_si) < 0.3):
+            x_traj = np.append(x_traj, pose[0:1], axis=0)
+            y_traj = np.append(y_traj, pose[1:2], axis=0)
+            if(np.linalg.norm(x_goal - pose_si) < 0.01):
+                for i in range(len(x_goal)):
+                    for j in range(len(x_goal[i])):
+                        if abs(x_goal[i][j]) == 2:
+                            x_goal[i][j] *= -1
+                # for i in range(len(x_goal)): #row
+                #     for j in range(len(x_goal[i]) - 1): #column
+                #         t = x_goal[i][j]
+                #         x_goal[i][j] = x_goal[i][j - 2]
+                #         x_goal[i][j-2] = 
 
-                flag = 1-flag
+                count += 1
+                if count == iterations:
+                    np.savetxt(LOG_DIR+'/X_traj.csv', x_traj, delimiter=' , ')
+                    np.savetxt(LOG_DIR+'/Y_traj.csv', y_traj, delimiter=' , ')
+                    rospy.signal_shutdown('End of testing')
+                    pass
 
-            if(flag == 0):
-                x_goal = p_circ[:, :N]
-            else:
-                x_goal = p_circ[:, N:]
 
+            dxi = si_position_controller(pose_si, x_goal)
             dxi = si_barrier_cert(dxi, pose_si)
             dxu = si_to_uni_dyn(dxi, pose)
             k = set_velocities(N, dxu)
             put_velocities(N, k)
 
     except rospy.ROSInterruptException:
-        
+        rospy.signal_shutdown('End of testing')
         pass

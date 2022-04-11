@@ -4,10 +4,21 @@ import numpy as np
 from math import *
 import matplotlib.pyplot as plt
 
-import sys
-
 DATA_PATH = '/home/robolab/raspi_ws/src/coverage_control/Data'
-sys.path.insert(0, DATA_PATH)
+
+def trajectories_plot(log_file_dir):
+    plt.style.use('seaborn-ticks')
+    plt.figure(1)
+    x_traj = np.genfromtxt(log_file_dir+ '/X_traj.csv', delimiter=' , ')
+    y_traj = np.genfromtxt(log_file_dir+ '/Y_traj.csv', delimiter=' , ')
+    for i in range(len(x_traj[0])):
+        # x = [x_traj[0, i], x_traj[-1, i]]
+        # y = [y_traj[0, i], y_traj[-1, i]]
+        # plt.plot(x, y,marker = 's', markevery = len(x_traj), ls ='--')
+        plt.plot(x_traj[:, i], y_traj[:, i],marker = 's', markevery = len(x_traj)-1, label = 'ROBOT '+ str(i + 1))
+    plt.legend(ncol = 2, frameon=True)
+    plt.show()
+    # plt.savefig('/home/robolab/raspi_ws/src/coverage_control/Data/FIG_'+str(iter)+'.png')
 
 def extract(log_file_dir):
     x_traj = np.genfromtxt(log_file_dir + '/X_traj.csv', delimiter=' , ')
@@ -77,4 +88,6 @@ def plot_feedback_control(log_file_1, log_file_2, log_file_3):
 
     plt.show()
 
-plot_feedback_control(DATA_PATH + '/Log_feedback_1', DATA_PATH + '/Log_feedback_2', DATA_PATH + '/Log_feedback_3')
+if __name__ == '__main__':
+    #plot_feedback_control(DATA_PATH + '/Log_feedback_1', DATA_PATH + '/Log_feedback_2', DATA_PATH + '/Log_feedback_3')
+    trajectories_plot(DATA_PATH)

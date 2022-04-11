@@ -20,23 +20,25 @@ def getposition(N):
 
     return pose
 
-def get_robot_location(robot):
+def get_robot_position(N):
+    pose = np.zeros((4, N))
+    i = 0
     AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
-    pose = np.zeros((3, N))
     for m in AlvarMsg.markers:
-        pose[0, ] = m.pose.pose.position
-        if marker_id <= 5:
-            marker_pose = m.pose.pose
-            pos = marker_pose.position
-            ori = marker_pose.orientation
-            ori_list = [ori.y, ori.z, ori.x, ori.w]
+        marker_id = m.id
+        if marker_id >= 0:
+            pose[0, i] = m.pose.pose.position.y
+            pose[1, i] = -m.pose.pose.position.z
+            orientation_q = m.pose.pose.orientation
+            orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
+            (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
+            pose[2, i] = -yaw
+            pose[3, i] = m.id
+            i += 1
+    ind = np.argsort(pose[3,:])
+    pose = pose[:,ind]
+    return pose[[0,1,2], :]
 
-            #transform orientation to euler
-            (roll, pitch, yaw) = euler_from_quaternion(ori_list)
-            robot[marker_id] = {'x': pos.y, 'y': pos.z, 'yaw': yaw}
-            robot = collections.OrderedDict(sorted(robot.items())) #sort dict by markers no.
-
-    return robot
 
 def put_velocities(N, dxu):
     for i in range(0, N):
@@ -51,7 +53,7 @@ def create_vel_msg(v, w):
     velMsg.linear.z = 0
     velMsg.angular.x = 0
     velMsg.angular.y = 0
-    velMsg.angular.z = w * 0.65
+    velMsg.angular.z = w*0.5
     return velMsg
 
 def set_velocities(ids, velocities, max_linear_velocity = 0.3, max_angular_velocity = 8):
