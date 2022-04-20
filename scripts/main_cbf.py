@@ -5,6 +5,8 @@ from raspi import *
 from transform import *
 from controller import *
 
+#This script used for experimenting with simulation.
+
 N = 20
 
 if __name__ == '__main__':

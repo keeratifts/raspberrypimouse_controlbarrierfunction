@@ -7,6 +7,9 @@ from raspi import *
 from transform import *
 from controller import *
 
+#Coverage control in certain area using Voronoi-based algorithm & Control barrier function for avoiding the collision.
+#This script used for experimenting with simulation.
+
 N = 20
 LOG_DIR = '/home/robolab/raspi_ws/src/coverage_control/Data'
 
