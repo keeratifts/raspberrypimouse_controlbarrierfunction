@@ -16,7 +16,6 @@ if __name__ == '__main__':
         x_goal = np.array([[-0.5, 0.5], [0, 0]]) #(x, y)
         while not rospy.is_shutdown():
             pose = get_robot_position(N)
-            print (pose)
             dxu = robotFeedbackControl(pose, x_goal)
             pose_si = uni_to_si_states(pose)
 
