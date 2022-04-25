@@ -5,17 +5,6 @@ from cvxopt.solvers import qp, options
 from scipy.integrate import odeint
 from math import *
 
-#Feedback control parameter for REAL ROBOT
-GOAL_DIST_THRESHOLD=0.08
-K_RO=2
-K_ALPHA=8
-V_CONST=0.25
-
-#Feedback control parameter for SIMULATED ROBOT
-GOAL_DIST_THRESHOLD=0.05
-K_RO=3
-K_ALPHA=13
-V_CONST=0.2
 
 def si_position_controller(xi, positions, x_velocity_gain=1, y_velocity_gain=1, velocity_magnitude_limit=0.5):
     _,N = np.shape(xi)
@@ -62,8 +51,20 @@ def si_barrier_cert(dxi, x, barrier_gain=80, safety_radius=0.12, magnitude_limit
 
     return np.reshape(result, (2, -1), order='F')
 
-def robotFeedbackControl(xi, positions, GOAL_DIST_THRESHOLD, K_RO, K_ALPHA, V_CONST): #P controller
+def robotFeedbackControl(xi, positions): #P controller
     
+    #Feedback control parameter for REAL ROBOT
+    GOAL_DIST_THRESHOLD=0.08
+    K_RO=2
+    K_ALPHA=8
+    V_CONST=0.25
+
+    #Feedback control parameter for SIMULATED ROBOT
+    # GOAL_DIST_THRESHOLD=0.05
+    # K_RO=3
+    # K_ALPHA=13
+    # V_CONST=0.2
+
     _,N = np.shape(xi)
     dxi = np.zeros((2, N))
 
