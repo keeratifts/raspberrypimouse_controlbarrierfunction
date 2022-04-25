@@ -4,7 +4,7 @@ import numpy as np
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Twist
-from ar_track_alvar_msgs.msg import AlvarMarkers
+# from ar_track_alvar_msgs.msg import AlvarMarkers
 from math import *
 
 def getposition(N): #get position in Gazebo simulator.
@@ -20,38 +20,38 @@ def getposition(N): #get position in Gazebo simulator.
 
     return pose
 
-def get_robot_position(N): #get position of ARtag markers attached on the robots using Intel Realsense Camera
-    # pose = np.zeros((4, N))
-    # i = 0
+# def get_robot_position(N): #get position of ARtag markers attached on the robots using Intel Realsense Camera
+#     pose = np.zeros((4, N))
+#     i = 0
+#     AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
+#     for m in AlvarMsg.markers:
+#         marker_id = m.id
+#         if marker_id >= 0:
+#             pose[0, i] = m.pose.pose.position.y
+#             pose[1, i] = -m.pose.pose.position.z
+#             orientation_q = m.pose.pose.orientation
+#             orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
+#             (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
+#             pose[2, i] = -yaw
+#             pose[3, i] = m.id
+#             i += 1
+#     ind = np.argsort(pose[3,:])
+#     pose = pose[:,ind]
+#     return pose[[0,1,2], :]
     # AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
-    # for m in AlvarMsg.markers:
-    #     marker_id = m.id
-    #     if marker_id >= 0:
-    #         pose[0, i] = m.pose.pose.position.y
-    #         pose[1, i] = -m.pose.pose.position.z
+    # pose = np.empty((4, N), float)
+
+    # while len(AlvarMsg.markers) == N:
+    #     for m in AlvarMsg.markers:
+    #         pose[0, m.id] = m.pose.pose.position.y #Since the camera is attached on a ceil. TF frame need to be transformed.
+    #         pose[1, m.id] = -m.pose.pose.position.z
     #         orientation_q = m.pose.pose.orientation
     #         orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
     #         (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-    #         pose[2, i] = -yaw
-    #         pose[3, i] = m.id
-    #         i += 1
-    # ind = np.argsort(pose[3,:])
-    # pose = pose[:,ind]
-    # return pose[[0,1,2], :]
-    AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
-    pose = np.empty((4, N), float)
+    #         pose[2, m.id] = -yaw
+    #         pose[3, m.id] = m.id
 
-    while len(AlvarMsg.markers) == N:
-        for m in AlvarMsg.markers:
-            pose[0, m.id] = m.pose.pose.position.y #Since the camera is attached on a ceil. TF frame need to be transformed.
-            pose[1, m.id] = -m.pose.pose.position.z
-            orientation_q = m.pose.pose.orientation
-            orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
-            (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-            pose[2, m.id] = yaw
-            pose[3, m.id] = m.id
-
-        return pose[[0,1,2], :]
+    #     return pose[[0,1,2], :]
 
         
 def put_velocities(N, dxu):
