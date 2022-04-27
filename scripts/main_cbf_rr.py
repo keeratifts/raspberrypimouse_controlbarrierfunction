@@ -4,6 +4,7 @@ import numpy as np
 from controller import *
 from transform import *
 from raspi import *
+from random import uniform
 
 #This script used for experimenting with real robots.
 
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     try:
         rospy.init_node('control_node', anonymous = False)
         rate = rospy.Rate(50)
-        x_goal = np.array([[-0.5, 0.5], [0, 0]]) #(x, y)
+        x_goal = np.array([[uniform(-0.8,0.8), uniform(-0.8,0.8)], [uniform(-0.8,0.8), uniform(-0.8,0.8)]]) #(x, y)
         while not rospy.is_shutdown():
             pose = get_robot_position(N)
             dxu = robotFeedbackControl(pose, x_goal)
@@ -23,7 +24,7 @@ if __name__ == '__main__':
                 rate.sleep()
                 for i in range(len(x_goal)):
                     for j in range(len(x_goal[i])):
-                        x_goal[i][j] *= -1
+                        x_goal = np.array([[uniform(-0.8,0.8), uniform(-0.8,0.8)], [uniform(-0.8,0.8), uniform(-0.8,0.8)]])
                         
             dxi = uni_to_si_dyn(dxu, pose)
             dxi = si_barrier_cert(dxi, pose_si)

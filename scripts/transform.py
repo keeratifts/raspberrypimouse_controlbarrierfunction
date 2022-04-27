@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import numpy as np
 
-def uni_to_si_states(poses, projection_distance=0.05):
+def uni_to_si_states(poses, projection_distance=0.1):
     """Takes unicycle states and returns single-integrator states
     poses: 3xN numpy array of unicycle states
     -> 2xN numpy array of single-integrator states
@@ -15,7 +15,7 @@ def uni_to_si_states(poses, projection_distance=0.05):
 
     return si_states
 
-def si_to_uni_dyn(dxi, poses, projection_distance=0.05, angular_velocity_limit = np.pi):
+def si_to_uni_dyn(dxi, poses, projection_distance=0.1, angular_velocity_limit = np.pi):
     M,N = np.shape(dxi)
 
     cs = np.cos(poses[2, :])
@@ -29,3 +29,13 @@ def si_to_uni_dyn(dxi, poses, projection_distance=0.05, angular_velocity_limit =
     dxu[1,dxu[1,:]<-angular_velocity_limit] = -angular_velocity_limit 
 
     return dxu
+
+def uni_to_si_dyn(dxu, poses, projection_distance=0.1,):
+    M,N = np.shape(dxu)
+    cs = np.cos(poses[2, :])
+    ss = np.sin(poses[2, :])
+
+    dxi = np.zeros((2, N))
+    dxi[0, :] = (cs*dxu[0, :] - projection_distance*ss*dxu[1, :])
+    dxi[1, :] = (ss*dxu[0, :] + projection_distance*cs*dxu[1, :])
+    return dxi
