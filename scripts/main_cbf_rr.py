@@ -9,7 +9,7 @@ from random import uniform
 #This script used for experimenting with real robots.
 
 N = 4 #no. of robots
-LOG_DIR = '/home/robolab/raspi_ws/src/coverage_control/Data/real_ex'
+# LOG_DIR = '/home/robolab/raspi_ws/src/coverage_control/Data/real_ex'
 
 if __name__ == '__main__':
     try:
@@ -40,8 +40,8 @@ if __name__ == '__main__':
                         if abs(x_goal[i][j]) == 0.7:
                             x_goal[i][j] *= -1
                 if iter % 3 == 0:
-                    np.savetxt(LOG_DIR+'/X_traj.csv', x_traj, delimiter=' , ')
-                    np.savetxt(LOG_DIR+'/Y_traj.csv', y_traj, delimiter=' , ')
+                    # np.savetxt(LOG_DIR+'/X_traj.csv', x_traj, delimiter=' , ')
+                    # np.savetxt(LOG_DIR+'/Y_traj.csv', y_traj, delimiter=' , ')
                     rospy.signal_shutdown('End of testing')
                     pass
 
