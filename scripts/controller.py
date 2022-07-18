@@ -4,15 +4,20 @@ from cvxopt import matrix, sparse
 from cvxopt.solvers import qp, options
 from scipy.integrate import odeint
 from math import *
+import time
 
+options['show_progress'] = False
+options['reltol'] = 1e-2 # was e-2
+options['feastol'] = 1e-2 # was e-4
+options['maxiters'] = 50 # default is 100
 
 def si_position_controller(xi, positions, x_velocity_gain=1, y_velocity_gain=1, velocity_magnitude_limit=0.5):
     _,N = np.shape(xi)
     dxi = np.zeros((2, N))
 
         # Calculate control input
-    dxi[0][:] = x_velocity_gain*(positions[0][:]-xi[0][:])
-    dxi[1][:] = y_velocity_gain*(positions[1][:]-xi[1][:])
+    dxi[0][:] = np.round(x_velocity_gain*(positions[0][:]-xi[0][:]), 2)
+    dxi[1][:] = np.round(y_velocity_gain*(positions[1][:]-xi[1][:]), 2)
 
         # Threshold magnitude
     norms = np.linalg.norm(dxi, axis=0)
@@ -22,13 +27,29 @@ def si_position_controller(xi, positions, x_velocity_gain=1, y_velocity_gain=1, 
 
     return dxi
 
-def si_barrier_cert(dxi, x, barrier_gain=80, safety_radius=0.12, magnitude_limit=0.25):
+def si_position_controller_2(xi, positions, x_velocity_gain=1, y_velocity_gain=1, velocity_magnitude_limit=0.1):
+    _,N = np.shape(xi)
+    dxi = np.zeros((2, N))
+
+        # Calculate control input
+    dxi[0][:] = (x_velocity_gain*(positions[0][:]-xi[0][:]))
+    dxi[1][:] = (y_velocity_gain*(positions[1][:]-xi[1][:]))
+
+        # Threshold magnitude
+    norms = np.linalg.norm(dxi, axis=0)
+    idxs = np.where(norms > velocity_magnitude_limit)
+    if norms[idxs].size != 0:
+        dxi[:, idxs] *= velocity_magnitude_limit/norms[idxs]
+
+    return dxi
+
+def si_barrier_cert(dxi, x, barrier_gain=100, safety_radius=0.3, magnitude_limit=0.25):
+    start_time = time.time()
     N = dxi.shape[1]
     num_constraints = int(comb(N, 2))
     A = np.zeros((num_constraints, 2*N))
     b = np.zeros(num_constraints)
     H = sparse(matrix(2*np.identity(2*N)))
-
     count = 0
     for i in range(N-1):
         for j in range(i+1, N):
@@ -48,7 +69,6 @@ def si_barrier_cert(dxi, x, barrier_gain=80, safety_radius=0.12, magnitude_limit
 
     f = -2*np.reshape(dxi, 2*N, order='F')
     result = qp(H, matrix(f), matrix(A), matrix(b))['x']
-
     return np.reshape(result, (2, -1), order='F')
 
 def robotFeedbackControl(xi, positions): #P controller
@@ -56,8 +76,8 @@ def robotFeedbackControl(xi, positions): #P controller
     #Feedback control parameter for REAL ROBOT
     GOAL_DIST_THRESHOLD=0.08
     K_RO=2
-    K_ALPHA=8
-    V_CONST=0.25
+    K_ALPHA=13
+    V_CONST=0.1
 
     #Feedback control parameter for SIMULATED ROBOT
     # GOAL_DIST_THRESHOLD=0.05
@@ -74,8 +94,8 @@ def robotFeedbackControl(xi, positions): #P controller
     v = K_RO * norms
     w = K_ALPHA * alpha
 
-    dxi[0][:] = v[:] / abs(v[:]) * V_CONST
-    dxi[1][:] = w[:] / abs(v[:]) * V_CONST
+    dxi[0][:] = np.round((v[:] / abs(v[:]) * V_CONST), 2)
+    dxi[1][:] = np.round((w[:] / abs(v[:]) * V_CONST), 2)
 
     idxs = np.where(norms < GOAL_DIST_THRESHOLD)
     dxi[:, idxs] = 0
