@@ -4,7 +4,7 @@ import numpy as np
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Twist
-# from ar_track_alvar_msgs.msg import AlvarMarkers
+from ar_track_alvar_msgs.msg import AlvarMarkers
 from math import *
 
 def getposition(N): #get position in Gazebo simulator.
@@ -20,24 +20,24 @@ def getposition(N): #get position in Gazebo simulator.
 
     return pose
 
-# def get_robot_position(N): #get position of ARtag markers attached on the robots using Intel Realsense Camera
-#     pose = np.zeros((4, N))
-#     i = 0
-#     AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
-#     for m in AlvarMsg.markers:
-#         marker_id = m.id
-#         if marker_id >= 0:
-#             pose[0, i] = m.pose.pose.position.y
-#             pose[1, i] = -m.pose.pose.position.z
-#             orientation_q = m.pose.pose.orientation
-#             orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
-#             (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-#             pose[2, i] = -yaw
-#             pose[3, i] = m.id
-#             i += 1
-#     ind = np.argsort(pose[3,:])
-#     pose = pose[:,ind]
-#     return pose[[0,1,2], :]
+def get_robot_position(N): #get position of ARtag markers attached on the robots using Intel Realsense Camera
+    pose = np.zeros((4, N))
+    i = 0
+    AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
+    for m in AlvarMsg.markers:
+        marker_id = m.id
+        if marker_id >= 0:
+            pose[0, i] = m.pose.pose.position.y
+            pose[1, i] = -m.pose.pose.position.z
+            orientation_q = m.pose.pose.orientation
+            orientation_list =  [orientation_q.y, orientation_q.z, orientation_q.x, orientation_q.w]
+            (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
+            pose[2, i] = -yaw
+            pose[3, i] = m.id
+            i += 1
+    ind = np.argsort(pose[3,:])
+    pose = pose[:,ind]
+    return pose[[0,1,2], :]
     # AlvarMsg = rospy.wait_for_message('/ar_pose_marker', AlvarMarkers)
     # pose = np.empty((4, N), float)
 
@@ -57,7 +57,7 @@ def getposition(N): #get position in Gazebo simulator.
 def put_velocities(N, dxu):
     for i in range(0, N):
         velPub = rospy.Publisher('raspi_'+str(i)+'/cmd_vel', Twist, queue_size=3)
-        velMsg = create_vel_msg(dxu[0, i], dxu[1, i])
+        velMsg = create_vel_msg(np.round(dxu[0, i], 2), np.round(dxu[1, i], 2))
         velPub.publish(velMsg)
 
 def create_vel_msg(v, w):
@@ -70,7 +70,7 @@ def create_vel_msg(v, w):
     velMsg.angular.z = w
     return velMsg
 
-def set_velocities(ids, velocities, max_linear_velocity = 0.5, max_angular_velocity = 6):
+def set_velocities(ids, velocities, max_linear_velocity = 0.1, max_angular_velocity = 4):
 
         # Threshold linear velocities
     idxs = np.where(np.abs(velocities[0, :]) > max_linear_velocity)
